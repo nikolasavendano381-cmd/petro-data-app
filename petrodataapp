@@ -1,6 +1,151 @@
 import java.util.Scanner;
 
 public class PetroDataApp {
+    // metodo para imprimir el menu
+
+    static void mostrarMenu() {
+        System.out.println("\n╔════════════════════════════════════════════╗");
+        System.out.println("║   PetroData Casanare S.A.S. - Yopal        ║");
+        System.out.println("║       Sistema de Produccion Diaria         ║");
+        System.out.println("╠════════════════════════════════════════════╣");
+        System.out.println("║  1. Ingresar produccion diaria (30 dias)   ║");
+        System.out.println("║  2. Ver estadisticas del mes               ║");
+        System.out.println("║  3. Buscar dias que superaron la meta      ║");
+        System.out.println("║  4. Ver reporte completo (omite dias = 0)  ║");
+        System.out.println("║  5. Salir                                  ║");
+        System.out.println("╚════════════════════════════════════════════╝");
+        System.out.print("Seleccione una opcion: ");
+    }
+    // opcion 1: ingresar los datos de los 30 dias
+    static void ingresarDatos(Scanner sc) {
+        System.out.println("\n=== OPCION 1 - Ingreso de datos ===");
+
+        // for para recorrer los 30 dias
+        for (int i = 0; i < 30; i++) {
+            int valor = -1;
+
+            // while para validar que el valor este entre 0 y 5000
+            while (valor < 0 || valor > 5000) {
+                System.out.print("Dia " + (i + 1) + " - Ingrese produccion (0-5000 bbl): ");
+                valor = sc.nextInt();
+
+                if (valor < 0 || valor > 5000) {
+                    System.out.println("  ⚠ Valor invalido. Ingrese entre 0 y 5000.");
+                }
+            }
+
+            produccion[i] = valor; // guardo el valor en el array
+        }
+
+        datosIngresados = true; // ya tenemos datos
+        System.out.println("✅ Datos ingresados correctamente!");
+    }
+     // opcion 2: calcular y mostrar estadisticas
+    static void verEstadisticas() {
+        // verifico que ya hayan ingresado datos primero
+        if (!datosIngresados) {
+            System.out.println("⚠ Primero debe ingresar los datos (opcion 1).");
+            return;
+        }
+
+        System.out.println("\n=== OPCION 2 - Estadisticas ===");
+
+        // uso for-each para calcular el total
+        int total = 0;
+        for (int bbl : produccion) {
+            total += bbl;
+        }
+
+        // promedio con decimales, por eso uso double
+        double promedio = (double) total / 30;
+
+        // busco el maximo y minimo con un for normal
+        int diaMax = 0;
+        int diaMin = 0;
+
+        for (int i = 1; i < 30; i++) {
+            if (produccion[i] > produccion[diaMax]) {
+                diaMax = i;
+            }
+            if (produccion[i] < produccion[diaMin]) {
+                diaMin = i;
+            }
+        }
+
+        System.out.println("Total mes   : " + total + " bbl");
+        System.out.printf("Promedio dia: %.2f bbl%n", promedio);
+        System.out.println("Maximo      : Dia " + (diaMax + 1) + " -> " + produccion[diaMax] + " bbl");
+        System.out.println("Minimo      : Dia " + (diaMin + 1) + " -> " + produccion[diaMin] + " bbl");
+    }
+    // opcion 3: buscar si algun dia supero la meta
+    static void buscarMeta(Scanner sc) {
+        if (!datosIngresados) {
+            System.out.println("⚠ Primero debe ingresar los datos (opcion 1).");
+            return;
+        }
+
+        System.out.println("\n=== OPCION 3 - Buscar meta ===");
+
+        int meta = -1;
+
+        // valido que la meta sea >= 0
+        while (meta < 0) {
+            System.out.print("Ingrese la meta en bbl: ");
+            meta = sc.nextInt();
+            if (meta < 0) {
+                System.out.println("  ⚠ La meta no puede ser negativa.");
+            }
+        }
+
+        boolean encontrado = false;
+
+        // recorro el array buscando el primer dia que supere la meta
+        for (int i = 0; i < 30; i++) {
+            if (produccion[i] > meta) {
+                System.out.println("✅ El primer dia que supero la meta fue el Dia "
+                        + (i + 1) + " con " + produccion[i] + " bbl.");
+                encontrado = true;
+                break; // paro la busqueda apenas encuentro el primero
+            }
+        }
+
+        // si ninguno supero la meta
+        if (!encontrado) {
+            System.out.println("❌ Ningun dia supero la meta de " + meta + " bbl.");
+        }
+    }
+    // opcion 4: imprimir reporte completo, saltando los dias con 0
+    static void verReporte() {
+        if (!datosIngresados) {
+            System.out.println("⚠ Primero debe ingresar los datos (opcion 1).");
+            return;
+        }
+
+        System.out.println("\n=== OPCION 4 - Reporte completo ===");
+
+        for (int i = 0; i < 30; i++) {
+
+            // si el dia tiene 0 barriles lo salto con continue
+            if (produccion[i] == 0) {
+                System.out.println("Dia " + (i + 1) + ": produccion 0 bbl - omitido. (continue)");
+                continue;
+            }
+
+            // clasifico el dia segun su produccion con if-else
+            String clasificacion;
+            if (produccion[i] >= 1500) {
+                clasificacion = "ALTO";
+            } else if (produccion[i] >= 800) {
+                clasificacion = "MEDIO";
+            } else {
+                clasificacion = "BAJO";
+            }
+
+            System.out.printf("Dia %2d | %4d bbl | [%s]%n",
+                    (i + 1), produccion[i], clasificacion);
+        }
+    }
+
 
     // array que guarda los 30 dias del mes
     static int[] produccion = new int[30];
@@ -40,151 +185,9 @@ public class PetroDataApp {
         sc.close();
     }
 
-    // metodo para imprimir el menu
-    static void mostrarMenu() {
-        System.out.println("\n╔════════════════════════════════════════════╗");
-        System.out.println("║   PetroData Casanare S.A.S. - Yopal        ║");
-        System.out.println("║       Sistema de Produccion Diaria         ║");
-        System.out.println("╠════════════════════════════════════════════╣");
-        System.out.println("║  1. Ingresar produccion diaria (30 dias)   ║");
-        System.out.println("║  2. Ver estadisticas del mes               ║");
-        System.out.println("║  3. Buscar dias que superaron la meta      ║");
-        System.out.println("║  4. Ver reporte completo (omite dias = 0)  ║");
-        System.out.println("║  5. Salir                                  ║");
-        System.out.println("╚════════════════════════════════════════════╝");
-        System.out.print("Seleccione una opcion: ");
-    }
+    
 
-    // opcion 1: ingresar los datos de los 30 dias
-    static void ingresarDatos(Scanner sc) {
-        System.out.println("\n=== OPCION 1 - Ingreso de datos ===");
+    
 
-        // for para recorrer los 30 dias
-        for (int i = 0; i < 30; i++) {
-            int valor = -1;
-
-            // while para validar que el valor este entre 0 y 5000
-            while (valor < 0 || valor > 5000) {
-                System.out.print("Dia " + (i + 1) + " - Ingrese produccion (0-5000 bbl): ");
-                valor = sc.nextInt();
-
-                if (valor < 0 || valor > 5000) {
-                    System.out.println("  ⚠ Valor invalido. Ingrese entre 0 y 5000.");
-                }
-            }
-
-            produccion[i] = valor; // guardo el valor en el array
-        }
-
-        datosIngresados = true; // ya tenemos datos
-        System.out.println("✅ Datos ingresados correctamente!");
-    }
-
-    // opcion 2: calcular y mostrar estadisticas
-    static void verEstadisticas() {
-        // verifico que ya hayan ingresado datos primero
-        if (!datosIngresados) {
-            System.out.println("⚠ Primero debe ingresar los datos (opcion 1).");
-            return;
-        }
-
-        System.out.println("\n=== OPCION 2 - Estadisticas ===");
-
-        // uso for-each para calcular el total
-        int total = 0;
-        for (int bbl : produccion) {
-            total += bbl;
-        }
-
-        // promedio con decimales, por eso uso double
-        double promedio = (double) total / 30;
-
-        // busco el maximo y minimo con un for normal
-        int diaMax = 0;
-        int diaMin = 0;
-
-        for (int i = 1; i < 30; i++) {
-            if (produccion[i] > produccion[diaMax]) {
-                diaMax = i;
-            }
-            if (produccion[i] < produccion[diaMin]) {
-                diaMin = i;
-            }
-        }
-
-        System.out.println("Total mes   : " + total + " bbl");
-        System.out.printf("Promedio dia: %.2f bbl%n", promedio);
-        System.out.println("Maximo      : Dia " + (diaMax + 1) + " -> " + produccion[diaMax] + " bbl");
-        System.out.println("Minimo      : Dia " + (diaMin + 1) + " -> " + produccion[diaMin] + " bbl");
-    }
-
-    // opcion 3: buscar si algun dia supero la meta
-    static void buscarMeta(Scanner sc) {
-        if (!datosIngresados) {
-            System.out.println("⚠ Primero debe ingresar los datos (opcion 1).");
-            return;
-        }
-
-        System.out.println("\n=== OPCION 3 - Buscar meta ===");
-
-        int meta = -1;
-
-        // valido que la meta sea >= 0
-        while (meta < 0) {
-            System.out.print("Ingrese la meta en bbl: ");
-            meta = sc.nextInt();
-            if (meta < 0) {
-                System.out.println("  ⚠ La meta no puede ser negativa.");
-            }
-        }
-
-        boolean encontrado = false;
-
-        // recorro el array buscando el primer dia que supere la meta
-        for (int i = 0; i < 30; i++) {
-            if (produccion[i] > meta) {
-                System.out.println("✅ El primer dia que supero la meta fue el Dia "
-                        + (i + 1) + " con " + produccion[i] + " bbl.");
-                encontrado = true;
-                break; // paro la busqueda apenas encuentro el primero
-            }
-        }
-
-        // si ninguno supero la meta
-        if (!encontrado) {
-            System.out.println("❌ Ningun dia supero la meta de " + meta + " bbl.");
-        }
-    }
-
-    // opcion 4: imprimir reporte completo, saltando los dias con 0
-    static void verReporte() {
-        if (!datosIngresados) {
-            System.out.println("⚠ Primero debe ingresar los datos (opcion 1).");
-            return;
-        }
-
-        System.out.println("\n=== OPCION 4 - Reporte completo ===");
-
-        for (int i = 0; i < 30; i++) {
-
-            // si el dia tiene 0 barriles lo salto con continue
-            if (produccion[i] == 0) {
-                System.out.println("Dia " + (i + 1) + ": produccion 0 bbl - omitido. (continue)");
-                continue;
-            }
-
-            // clasifico el dia segun su produccion con if-else
-            String clasificacion;
-            if (produccion[i] >= 1500) {
-                clasificacion = "ALTO";
-            } else if (produccion[i] >= 800) {
-                clasificacion = "MEDIO";
-            } else {
-                clasificacion = "BAJO";
-            }
-
-            System.out.printf("Dia %2d | %4d bbl | [%s]%n",
-                    (i + 1), produccion[i], clasificacion);
-        }
-    }
+    
 }
